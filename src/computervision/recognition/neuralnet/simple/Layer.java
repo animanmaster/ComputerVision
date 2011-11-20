@@ -17,7 +17,7 @@ import java.util.List;
 public class Layer implements Serializable
 {
     protected List<Neuron> nodes;
-    private transient double[] output;
+    private double[] output;
 
     public Layer()
     {
@@ -70,7 +70,7 @@ public class Layer implements Serializable
         int n = 0;
         for (Neuron node : nodes)
         {
-            str.append("\tNode ").append(n++).append(": ").append(node);
+            str.append("\tNode ").append(n++).append(": ").append(node).append("\n");
         }
         return str.toString();
     }

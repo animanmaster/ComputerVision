@@ -5,6 +5,7 @@
 
 package computervision.recognition.neuralnet.simple;
 
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.List;
  *
  * @author Malik Ahmed
  */
-public class NeuralNetwork
+public class NeuralNetwork implements Serializable
 {
     protected LinkedList<Layer> layers;
     protected int numInputs;
@@ -113,18 +114,22 @@ public class NeuralNetwork
         double gPrime, base;
 
         //Output layer node.
+        //System.out.println("[NeuralNetwork] Output Layer");
         for (int j = 0; j < nodes.length; j++)
         {
             nodeOut = layerOuts[j];
             delta[j] = expectedOutput[j] - nodeOut;
             node = nodes[j];
             gPrime = nodeOut * (1 - nodeOut);
+            //System.out.println("[NeuralNetwork] Output Layer gPrime = " + gPrime );
             base = learnRate * delta[j] * gPrime; //this stays the same for the node.
             //handle special weight first, where input = 1.
             node.specialWeight += base * 1;
+            //System.out.println("[NeuralNetwork] base = " + base);
             for (int i = 0; i < layerIns.length; i++)
             {
                 node.weights[i] += base * layerIns[i];
+                //System.out.println("[NeuralNetwork] Output Layer Weight " + i + " = " + node.weights[i]);
             }
         }
 
@@ -151,16 +156,30 @@ public class NeuralNetwork
                     delta[j] += (lastNodes[i].weights[j] * lastDelta[i]);
                 }
                 gPrime = nodeOut * (1 - nodeOut);
+                //System.out.println("[NeuralNetwork] Hidden Layer gPrime = " + gPrime );
                 base = learnRate * delta[j] * gPrime;
                 //handle special weight first, where input = 1.
                 node.specialWeight += base * 1;
+
+                //System.out.println("[NeuralNetwork] Hidden Layer base = " + base );
                 for (int i = 0; i < layerIns.length; i++)
                 {
                     node.weights[i] += base * layerIns[i];
+                    //System.out.println("[NeuralNetwork] Hidden Layer Node " + i + " weight = " + node.weights[i]);
                 }
             }
         }
         return outputs;
+    }
+
+    public Neuron[][] getNeurons()
+    {
+        Neuron[][] neurons = new Neuron[layers.size()][];
+        for (int i = 0; i < layers.size(); i++)
+        {
+            neurons[i] = layers.get(i).getNodes();
+        }
+        return neurons;
     }
 
     public String toString()

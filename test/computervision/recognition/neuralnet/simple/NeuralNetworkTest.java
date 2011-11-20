@@ -5,6 +5,7 @@
 
 package computervision.recognition.neuralnet.simple;
 
+import java.util.Random;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -106,5 +107,48 @@ public class NeuralNetworkTest {
         input[0] = 1; input[1] = 1;
         assertEquals(0.0, network.process(input)[0], 0.5);  //1 xor 1 = 0
     }
+    
+    private float randomWeight(Random rand)
+    {
+        return (float)rand.nextDouble() - 0.5f;  //[-0.5, 0.5]
+    }
+    
+    private void assertArrayEquals(double[] expected, double[] actual, double delta)
+    {
+        assertEquals(expected.length, actual.length);
+        for (int i = 0; i < expected.length; i++)
+            assertEquals(expected[i], actual[i], delta);
+    }
+ /*
+    @Test public void trainXorNetwork()
+    {
+        Random rand = new Random();
+        double[][] trainingSamples = new double[][]{{0, 0}, {0, 1}, {1, 0}, {1, 1}};
+        double[][] expectedOutput = new double[][]{ {0}, {1}, {1}, {0}};
+        NeuralNetwork network = new NeuralNetwork(2);
+        network.addLayer(new Neuron(g, randomWeight(rand), randomWeight(rand), randomWeight(rand)),
+                         new Neuron(g, randomWeight(rand), randomWeight(rand), randomWeight(rand)));
+        network.addLayer(new Neuron(g, randomWeight(rand), randomWeight(rand), randomWeight(rand)));
+        
+        double learningRate = 0.1;
+        int trainingIndex;
+        
+        //Let's do some training, shall we?
+        System.out.println("Initial Network: ");
+        System.out.println(network);
+        for (int i = 0; i < 300; i++)   //train it 300 times
+        {
+            trainingIndex = rand.nextInt(trainingSamples.length);
+            network.train(expectedOutput[trainingIndex], learningRate, trainingSamples[trainingIndex]);
+            System.out.println(network);
+        }
+        
+        for (int i = 0; i < trainingSamples.length; i++)
+        {
+            assertArrayEquals(expectedOutput[i], network.process(trainingSamples[i]), 0.01);
+        }
+    }
+
+*/
 
 }

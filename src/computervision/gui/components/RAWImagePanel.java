@@ -51,6 +51,7 @@ public class RAWImagePanel extends JPanel
         setImage(image);
     }
 
+    //TODO
     private void addEventListeners()
     {
         label.addMouseListener(new MouseAdapter()
