@@ -12,8 +12,6 @@ import computervision.recognition.neuralnet.simple.NeuralNetwork;
 import computervision.recognition.neuralnet.simple.ActivationFunction;
 import computervision.recognition.neuralnet.simple.Neuron;
 import java.awt.Rectangle;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -33,9 +31,6 @@ public class AtoJRecognizer implements Recognizer<Character>
     private NeuralNetwork neuralNetwork = new NeuralNetwork(14);
     private BoundingBox boundingBox = new BoundingBox();
     private int[][] mappedImage = new int[7][7];
-
-    private List<Future<Integer>> regionCounts = new LinkedList<Future<Integer>>();
-    private ExecutorService executor = Executors.newCachedThreadPool();
 
     private static final char[] RECOGNIZABLE = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'};
     private static final ActivationFunction g = new ActivationFunction() {
@@ -129,22 +124,6 @@ public class AtoJRecognizer implements Recognizer<Character>
         return neuralNetwork;
     }
 
-    private int countRegion(boolean[][] pixels, int row, int col, int width, int height)
-    {
-        int total = 0;
-        int maxRows = Math.min(row + height, pixels.length),
-            maxCols = Math.min(col + width, pixels[0].length);
-        for (int i = row; i < maxRows; i++)
-        {
-            for (int j = col; j < maxCols; j++)
-            {
-                if (pixels[i][j])
-                    total++;
-            }
-        }
-        return total;
-    }
-
     private int getMappedRow(Pixel pixel, Rectangle box, int maxRows)
     {
         return (pixel.getRow() - box.y)/maxRows;
@@ -158,36 +137,6 @@ public class AtoJRecognizer implements Recognizer<Character>
     private double[] getNeuralNetInput(BinaryImage image)
     {
         Rectangle box = boundingBox.extract(image, null).getValue();
-        //dividing the bounding box into a 7x7 image
-//        int partitionWidth = box.width/7, partitionHeight = box.height/7;
-//        boolean[][] pixels = image.getPixelValues();
-        //if the number of pixels in the region exceeds this value, consider it a 1 in the mappedImage;
-//        int threshold = 0;
-        
-//        for (int i = 0; i < mappedImage.length; i++)
-//        {
-//            for (int j = 0; j < mappedImage[i].length; j++)
-//            {
-//                regionCounts.add(executor.submit(new RegionCounter(pixels, i * partitionWidth, j * partitionHeight, partitionWidth, partitionHeight)));
-//            }
-//        }
-//
-//        Iterator<Future<Integer>> it = regionCounts.iterator();
-//        for (int i = 0; i < mappedImage.length; i++)
-//        {
-//            for (int j = 0; j < mappedImage[i].length; j++)
-//            {
-//                try
-//                {
-//                    mappedImage[i][j] = (it.next().get() > threshold? 1 : 0) ;
-//                }
-//                catch (Exception e)
-//                {
-//                    e.printStackTrace();
-//                    mappedImage[i][j] = 0;
-//                }
-//            }
-//        }
         for (int[] row : mappedImage)
         {
             for (int i = 0; i < row.length; i++)
@@ -204,10 +153,6 @@ public class AtoJRecognizer implements Recognizer<Character>
             mappedImage[i][j] = 1;
         }
 
-//        System.out.println("Mapped Image:");
-//        for (int[] row : mappedImage)
-//            System.out.println(Arrays.toString(row));
-        
         double[] in = new double[14];
         double val;
         for (int row = 0; row < mappedImage.length; row++)
@@ -220,19 +165,16 @@ public class AtoJRecognizer implements Recognizer<Character>
             }
         }
 
-//        System.out.println("Input: " + Arrays.toString(in));
-
         //Normalization TODO Make this more efficient! You can do this inside the above loop with some effort.
         for (int row = 0; row < mappedImage.length; row++)
         {
             in[row] = in[row]/10.0 + 0.15;    //Turns 0 into .15, 1 to .25, ..., 7 to .85
             for (int col = 0; col < mappedImage[row].length; col++)
             {
-                in[col + mappedImage.length] = in[col + mappedImage.length]/10 + 0.15;
+                in[col + mappedImage.length] = in[col + mappedImage.length]/10.0 + 0.15;
             }
         }
-//        System.out.println("Normalized Input: " + Arrays.toString(in));
-
+        
         return in;
     }
     
@@ -260,20 +202,19 @@ public class AtoJRecognizer implements Recognizer<Character>
         char result = 0;
         for (index = 0; index < input.length && (RECOGNIZABLE[index] != actual); index++)
         {
-            //lolwut
+            //lolwut finding the index of the result
         }
         ideal[index] = 1.0; //the rest are 0 by default.
         index = getResultIndex(neuralNetwork.train(ideal, learnRate, input).getLast());
         if (index >= 0 && index < RECOGNIZABLE.length)
             result = RECOGNIZABLE[index];
-        System.out.println("Trained the network for '" + actual + "':");
-        System.out.println(neuralNetwork);
+//        System.out.println("Trained the network for '" + actual + "':");
+//        System.out.println(neuralNetwork);
         return result;
     }
 
     public Character recognize(BinaryImage image)
     {
-//        image = preprocess(image);
         char recognized = 0;
         int index = getResultIndex(neuralNetwork.process(getNeuralNetInput(image)));
         if (index >= 0 && index < RECOGNIZABLE.length)

@@ -14,6 +14,8 @@ import java.util.Arrays;
  */
 public class Neuron implements Cloneable, Serializable
 {
+    private static final long serialVersionUID = 9003L;
+
     public static final float[] DEFAULT_WEIGHTS = new float[]{ 1.0f };
     public static final float   DEFAULT_SPECIAL_WEIGHT = 0.0f;
 
@@ -79,7 +81,10 @@ public class Neuron implements Cloneable, Serializable
     @Override
     public Neuron clone()
     {
-        return new Neuron(function);
+        Neuron newNeuron = new Neuron(function);
+        newNeuron.specialWeight = specialWeight;
+        newNeuron.weights = weights;
+        return newNeuron;
     }
 
     @Override

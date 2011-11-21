@@ -16,6 +16,8 @@ import java.util.List;
  */
 public class Layer implements Serializable
 {
+    private static final long serialVersionUID = 9002L;
+
     protected List<Neuron> nodes;
     private double[] output;
 

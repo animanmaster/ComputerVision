@@ -14,8 +14,10 @@ import java.util.List;
  *
  * @author Malik Ahmed
  */
-public class NeuralNetwork implements Serializable
+public class NeuralNetwork implements Serializable, Cloneable
 {
+    private static final long serialVersionUID = 9001L;
+
     protected LinkedList<Layer> layers;
     protected int numInputs;
 
@@ -182,6 +184,7 @@ public class NeuralNetwork implements Serializable
         return neurons;
     }
 
+    @Override
     public String toString()
     {
         StringBuilder str = new StringBuilder();
@@ -191,4 +194,20 @@ public class NeuralNetwork implements Serializable
             str.append("Layer ").append(n++).append(": ").append(layer).append("\n");
         return str.toString();
     }
+
+    @Override
+    public NeuralNetwork clone()
+    {
+        NeuralNetwork newNet = new NeuralNetwork(numInputs);
+        Neuron[] neurons;
+        for (Layer layer : layers)
+        {
+            neurons = layer.getNodes();
+            for (int i = 0; i < neurons.length; i++)
+                neurons[i] = neurons[i].clone();
+            newNet.addLayer(neurons);
+        }
+        return newNet;
+    }
+
 }

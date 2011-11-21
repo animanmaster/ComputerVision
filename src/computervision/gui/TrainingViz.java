@@ -32,6 +32,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -83,7 +84,7 @@ public class TrainingViz extends JFrame
     private NeuralNetViz netviz;
     private AtoJRecognizer recognizer;
 
-    private static final File storedNeuralNet = new File(System.getProperty("user.home") + File.separator + ".computervision/neuralnet.obj");
+    private static final File storedNeuralNet = new File(System.getProperty("user.home") + File.separator + ".computervision/AtoJ.net");
 
     private ObjectOutputStream os = null;
     private ObjectInputStream is = null;
@@ -91,6 +92,9 @@ public class TrainingViz extends JFrame
     private List<SampleImage> samples = new ArrayList<SampleImage>();
 
     private volatile boolean inTraining = false, liveUpdate = true;
+    private double delta = 0.1;
+    private double averageCorrectness = 0;
+    private int trainingCount = 0;
     
     public static void main(String[] args)
     {
@@ -167,28 +171,48 @@ public class TrainingViz extends JFrame
             }
         });
         panel.add(button);
+
+        final JTextField deltaField = new JTextField(Double.toString(delta));
         final JButton train = new JButton("Start Training");
         final JButton stopTraining = new JButton("Stop Training");
         final JLabel trainingSessions = new JLabel("0 (0%)");
+
         panel.add(trainingSessions);
+        panel.add(deltaField);
         panel.add(train);
         panel.add(stopTraining);
+
+        deltaField.setColumns(10);
+        deltaField.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                try
+                {
+                    delta = Double.parseDouble(deltaField.getText());
+                }
+                catch(NumberFormatException nfe)
+                {
+                    JOptionPane.showMessageDialog(TrainingViz.this, "Not a valid delta!");
+                    deltaField.setText(Double.toString(delta));
+                }
+            }
+        });
+            final Runnable update = new Runnable()
+            {
+                public void run()
+                {
+                    synchronized(netviz)
+                    {
+                        netviz.redraw();
+                        trainingSessions.setText(trainingCount + " (" + String.format("%.2f", averageCorrectness * 100.0) + "%)");
+                    }
+                }
+            };
         trainingSessions.setToolTipText("Number of times the network has been trained and its correctness percentage");
         train.addActionListener(new ActionListener() {
 
-            double averageCorrectness = 0;
-            int trainingCount = 0;
 
-            final double delta = 0.1;
             final Random rand = new Random();
-            final Runnable update = new Runnable()
-            {
-                public void run() 
-                {
-                    netviz.redraw();
-                    trainingSessions.setText(trainingCount + " (" + String.format("%.2f", averageCorrectness * 100.0) + "%)");
-                }  
-            };
             final Runnable doTraining = new Runnable()
                 {
                     public void run()
@@ -200,9 +224,10 @@ public class TrainingViz extends JFrame
                         {
                             num = rand.nextInt(samples.size());
                             sample = samples.get(num);
-                            result = recognizer.train(sample.image, sample.character, delta);
-                            updateAverageAndTotal(result == sample.character);
-                            SwingUtilities.invokeLater(update);
+                            synchronized(netviz){
+                                result = recognizer.train(sample.image, sample.character, delta);
+                                updateAverageAndTotal(result == sample.character);
+                            }
                         }
                         updateButtons(inTraining);
                     }
@@ -214,7 +239,8 @@ public class TrainingViz extends JFrame
                 double an = (latestIsCorrect? 1.0 : 0.0);
                 //recursive formula for average is
                 //avg = (n-1)/n * lastAvg * an/n
-                averageCorrectness = (trainingCount-1)/trainingCount * averageCorrectness + (an / trainingCount);
+//                averageCorrectness = (trainingCount-1)/trainingCount * averageCorrectness + (an / trainingCount);
+                averageCorrectness = (averageCorrectness + an)/2;
             }
 
             void updateButtons(boolean isTraining)
@@ -291,10 +317,18 @@ public class TrainingViz extends JFrame
             }
         });
         panel.add(button);
+        button = new JButton("Update Display of Neural Network");
+        button.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                SwingUtilities.invokeLater(update);
+            }
+        });
+        panel.add(button);
         add(panel, BorderLayout.NORTH);
         add(new JScrollPane(netviz), BorderLayout.CENTER);
     }
-
+    
     private boolean writeNeuralNet(NeuralNetwork net)
     {
         boolean greatSuccess = true;

@@ -11,7 +11,6 @@ import computervision.image.RAWImage;
 import computervision.recognition.DigitRecognizer;
 import java.awt.BorderLayout;
 import java.awt.Container;
-import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
