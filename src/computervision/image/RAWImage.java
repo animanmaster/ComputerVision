@@ -105,7 +105,7 @@ public class RAWImage extends Image
     public BufferedImage toBufferedImage()
     {
         //Rows <=> Height/Y-axis, Columns <=> Width/X-axis
-        BufferedImage image = new BufferedImage(getColumns(), getRows(), BufferedImage.TYPE_BYTE_INDEXED);
+        BufferedImage image = new BufferedImage(getColumns(), getRows(), BufferedImage.TYPE_BYTE_GRAY);
         for (int y = 0; y < this.pixels.length; y++)
         {
             for (int x = 0; x < this.pixels[y].length; x++)

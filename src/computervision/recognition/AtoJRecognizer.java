@@ -12,13 +12,8 @@ import computervision.recognition.neuralnet.simple.NeuralNetwork;
 import computervision.recognition.neuralnet.simple.ActivationFunction;
 import computervision.recognition.neuralnet.simple.Neuron;
 import java.awt.Rectangle;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  *
@@ -39,7 +34,7 @@ public class AtoJRecognizer implements Recognizer<Character>
             double sum = 0;
             for (double val : values)
                 sum += val;
-            return 1/(1 + Math.pow(Math.E, -sum));  //g(x) = (1 + e^-x)^-1
+            return 1/(1 + Math.exp(-sum));  //g(x) = (1 + e^-x)^-1
         }
     };
 
