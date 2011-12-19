@@ -6,6 +6,7 @@
 package computervision;
 
 import computervision.gui.DigitRecognization;
+import computervision.gui.Homework6;
 import computervision.gui.VisionSandbox;
 import javax.swing.UIManager;
 
@@ -27,6 +28,7 @@ public class Main
             e.printStackTrace();
         }
 //        new VisionSandbox().setVisible(true);
-        new DigitRecognization().setVisible(true);
+//        new DigitRecognization().setVisible(true);
+        new Homework6().setVisible(true);
     }
 }

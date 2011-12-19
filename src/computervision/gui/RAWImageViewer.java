@@ -218,7 +218,7 @@ public class RAWImageViewer extends JFrame
             this.image = image;
             this.panel.removeAll();
             this.panel.add(new JLabel(new ImageIcon(this.image.toBufferedImage())));
-            this.panel.validate();
+            this.panel.revalidate();
         }
     }
 

@@ -105,12 +105,16 @@ public class RAWImage extends Image
     public BufferedImage toBufferedImage()
     {
         //Rows <=> Height/Y-axis, Columns <=> Width/X-axis
-        BufferedImage image = new BufferedImage(getColumns(), getRows(), BufferedImage.TYPE_BYTE_GRAY);
+        BufferedImage image = new BufferedImage(getColumns(), getRows(), BufferedImage.TYPE_INT_RGB);
         for (int y = 0; y < this.pixels.length; y++)
         {
             for (int x = 0; x < this.pixels[y].length; x++)
             {
-                image.setRGB(x, y, this.pixels[y][x]);
+//                image.setRGB(x, y, this.pixels[y][x]);
+                //Trying the following solution from
+                //http://stackoverflow.com/questions/5436931/convert-a-2d-array-of-int-ranging-from-0-256-into-a-grayscale-png
+                int value = pixels[y][x] << 16 | pixels[y][x] << 8 | pixels[y][x];
+                image.setRGB(x, y, value);
             }
         }
         return image;
@@ -135,23 +139,27 @@ public class RAWImage extends Image
     @Override
     void read(InputStream in) throws IOException
     {
-        int bytesRead;
+//        int bytesRead;
         //RAW image pixels use one byte each.
-        byte[] buffer = new byte[rows];
+//        byte[] buffer = new byte[rows];
         for (int[] row : pixels)
         {
-            bytesRead = in.read(buffer);
-            if (bytesRead < 0)
+//            bytesRead = in.read(buffer);
+//            if (bytesRead < 0)
+//            {
+//                //EOF
+//                break;
+//            }
+//            else
+//            {
+//                for (int i = 0; i < buffer.length; i++)
+//                {
+//                    row[i] = buffer[i];
+//                }
+//            }
+            for (int col = 0; col < row.length; col++)
             {
-                //EOF
-                break;
-            }
-            else
-            {
-                for (int i = 0; i < buffer.length; i++)
-                {
-                    row[i] = buffer[i];
-                }
+                row[col] = in.read();
             }
         }
         in.close();

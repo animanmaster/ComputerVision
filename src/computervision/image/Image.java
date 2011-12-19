@@ -68,6 +68,6 @@ public abstract class Image implements Cloneable
 
     public Dimension getSize()
     {
-        return new Dimension(rows, cols);
+        return new Dimension(cols, rows);
     }
 }
